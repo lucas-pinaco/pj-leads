@@ -1,0 +1,66 @@
+<div class="planos-container">
+  <h1>Planos Disponíveis</h1>
+  <p class="subtitle">Escolha o plano ideal para o seu negócio</p>
+
+  <div class="planos-grid" *ngIf="!carregando">
+    <mat-card *ngFor="let plano of planos" 
+              [class.plano-destaque]="isPlanoDestaque(plano)"
+              appearance="outlined">
+      
+      <mat-card-header>
+        <mat-card-title>{{ plano.nome }}</mat-card-title>
+        <mat-card-subtitle>{{ plano.descricao }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="preco">
+          <span class="valor">{{ formatarValor(plano.valor) }}</span>
+          <span class="periodo">/mês</span>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="recursos">
+          <h3>Recursos incluídos:</h3>
+          <div class="recurso" *ngFor="let recurso of plano.recursos">
+            <mat-icon [color]="isPlanoDestaque(plano) ? 'primary' : ''">
+              {{ getIconeRecurso(recurso) }}
+            </mat-icon>
+            <span>{{ recurso }}</span>
+          </div>
+        </div>
+
+        <div class="limites">
+          <mat-chip-listbox aria-label="Limites">
+            <mat-chip-option selected [disabled]="true">
+              <mat-icon>download</mat-icon>
+              {{ plano.limiteExportacoesMes === -1 ? 'Exportações Ilimitadas' : plano.limiteExportacoesMes + ' exportações/mês' }}
+            </mat-chip-option>
+            <mat-chip-option selected [disabled]="true">
+              <mat-icon>group</mat-icon>
+              Até {{ plano.limiteLeadsPorExportacao }} leads
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-flat-button 
+                [color]="isPlanoDestaque(plano) ? 'primary' : ''"
+                class="btn-selecionar">
+          Selecionar Plano
+        </button>
+      </mat-card-actions>
+
+      <div class="badge-destaque" *ngIf="isPlanoDestaque(plano)">
+        <mat-icon>star</mat-icon>
+        MAIS POPULAR
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="carregando" *ngIf="carregando">
+    <mat-icon>hourglass_empty</mat-icon>
+    <p>Carregando planos...</p>
+  </div>
+</div>

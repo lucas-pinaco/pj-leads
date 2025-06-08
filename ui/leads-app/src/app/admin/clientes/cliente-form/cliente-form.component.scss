@@ -1,0 +1,67 @@
+.cliente-form {
+  padding: 16px;
+  min-width: 500px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 16px;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  mat-form-field {
+    flex: 1;
+
+    &.full-width {
+      width: 100%;
+    }
+
+    &.flex-1 {
+      flex: 1;
+    }
+
+    &.flex-2 {
+      flex: 2;
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0 -24px -24px;
+  border-top: 1px solid #e0e0e0;
+
+  button {
+    margin-left: 8px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 8px;
+  }
+}
+
+// Responsividade
+@media (max-width: 600px) {
+  .cliente-form {
+    min-width: auto;
+  }
+
+  .form-row {
+    flex-direction: column;
+    
+    mat-form-field {
+      width: 100%;
+    }
+  }
+}

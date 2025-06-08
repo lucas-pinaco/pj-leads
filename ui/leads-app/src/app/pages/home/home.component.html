@@ -1,0 +1,134 @@
+
+  <div class="container">
+    <h2>Exportar Leads</h2>
+  
+    <form (ngSubmit)="exportar()" #f="ngForm" class="form-grid">
+  
+      <!-- Linha 1 -->
+      <div class="form-row">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Razão Social ou Nome Fantasia</mat-label>
+          <input matInput [(ngModel)]="filtros.RazaoOuFantasia" name="razao" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>CNAE</mat-label>
+          <input matInput [(ngModel)]="filtros.CNAE" name="cnae" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Natureza Jurídica</mat-label>
+          <input matInput [(ngModel)]="filtros.NaturezaJuridica" name="natureza" />
+        </mat-form-field>
+      </div>
+  
+      <!-- Linha 2 -->
+      <div class="form-row">
+        <label class="block-label">Situação Cadastral:</label>
+        <mat-checkbox *ngFor="let s of situacoes"
+                      [checked]="filtros.SituacoesCadastrais.includes(s)"
+                      (change)="toggleSituacao(s)">
+          {{ s }}
+        </mat-checkbox>
+      </div>
+  
+      <!-- Linha 3 -->
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>UF</mat-label>
+          <input matInput maxlength="2" [(ngModel)]="filtros.Estado" name="estado" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Município</mat-label>
+          <input matInput [(ngModel)]="filtros.Municipio" name="municipio" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Bairro</mat-label>
+          <input matInput [(ngModel)]="filtros.Bairro" name="bairro" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>CEP</mat-label>
+          <input matInput maxlength="8" [(ngModel)]="filtros.CEP" name="cep" />
+        </mat-form-field>
+      </div>
+  
+      <!-- Linha 4 -->
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>DDD</mat-label>
+          <input matInput maxlength="2" [(ngModel)]="filtros.DDD" name="ddd" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Data Abertura - A partir de</mat-label>
+          <input matInput [matDatepicker]="pickerDe" [(ngModel)]="filtros.DataAberturaDe" name="dataDe" />
+          <mat-datepicker-toggle matSuffix [for]="pickerDe"></mat-datepicker-toggle>
+          <mat-datepicker #pickerDe></mat-datepicker>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Data Abertura - Até</mat-label>
+          <input matInput [matDatepicker]="pickerAte" [(ngModel)]="filtros.DataAberturaAte" name="dataAte" />
+          <mat-datepicker-toggle matSuffix [for]="pickerAte"></mat-datepicker-toggle>
+          <mat-datepicker #pickerAte></mat-datepicker>
+        </mat-form-field>
+      </div>
+  
+      <!-- Linha 5 -->
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Capital Social (mín)</mat-label>
+          <input matInput type="number" [(ngModel)]="filtros.CapitalSocialMinimo" name="capitalMin" />
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Capital Social (máx)</mat-label>
+          <input matInput type="number" [(ngModel)]="filtros.CapitalSocialMaximo" name="capitalMax" />
+        </mat-form-field>
+      </div>
+  
+      <!-- Linha 6 -->
+      <div class="form-row checkboxes">
+        <mat-checkbox [(ngModel)]="filtros.SomenteMEI" name="somenteMei">Somente MEI</mat-checkbox>
+        <mat-checkbox [(ngModel)]="filtros.ExcluirMEI" name="excluirMei">Excluir MEI</mat-checkbox>
+        <mat-checkbox [(ngModel)]="filtros.SomenteMatriz" name="matriz">Somente Matriz</mat-checkbox>
+        <mat-checkbox [(ngModel)]="filtros.SomenteFilial" name="filial">Somente Filial</mat-checkbox>
+      </div>
+  
+      <!-- Linha 7 -->
+      <div class="form-row checkboxes">
+        <mat-checkbox [(ngModel)]="filtros.ComTelefone" name="comTelefone">Com telefone</mat-checkbox>
+        <mat-checkbox [(ngModel)]="filtros.SomenteFixo" name="fixo">Somente fixo</mat-checkbox>
+        <mat-checkbox [(ngModel)]="filtros.SomenteCelular" name="celular">Somente celular</mat-checkbox>
+        <mat-checkbox [(ngModel)]="filtros.ComEmail" name="comEmail">Com e-mail</mat-checkbox>
+      </div>
+  
+      <!-- Linha 8 -->
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Quantidade</mat-label>
+          <input matInput type="number" [(ngModel)]="filtros.Quantidade" name="quantidade" />
+        </mat-form-field>
+  
+        <mat-checkbox [(ngModel)]="filtros.IncluirDuplicados" name="duplicados">Incluir Duplicados</mat-checkbox>
+      </div>
+      <div class="form-row">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>E-mail para envio</mat-label>
+        <input matInput [(ngModel)]="filtros.EmailDestino" name="emailDestino" />
+      </mat-form-field>
+      
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nome do arquivo</mat-label>
+        <input matInput [(ngModel)]="filtros.NomeArquivo" name="nomeArquivo" />
+      </mat-form-field>
+    </div>
+      <div class="form-row">
+        <button mat-raised-button color="primary" type="submit">Exportar Excel</button>
+      </div>
+    </form>
+  </div>
+  

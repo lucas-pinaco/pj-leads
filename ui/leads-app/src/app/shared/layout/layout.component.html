@@ -1,0 +1,60 @@
+<!-- layout.component.html -->
+<mat-sidenav-container class="sidenav-container">
+  <!-- Menu Lateral -->
+  <mat-sidenav #drawer class="sidenav" mode="side" opened>
+    <mat-toolbar color="primary">
+      <span>PJ Leads</span>
+    </mat-toolbar>
+    
+    <mat-nav-list>
+      <a mat-list-item 
+         *ngFor="let item of menuFiltrado()" 
+         [routerLink]="item.rota"
+         routerLinkActive="active-link">
+        <mat-icon matListItemIcon>{{ item.icone }}</mat-icon>
+        <span matListItemTitle>{{ item.titulo }}</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Conteúdo Principal -->
+  <mat-sidenav-content>
+    <!-- Toolbar Superior -->
+    <mat-toolbar color="primary" class="toolbar-main">
+      <button
+        type="button"
+        mat-icon-button
+        (click)="drawer.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <span class="spacer"></span>
+      
+      <!-- Menu do Usuário -->
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      
+      <mat-menu #userMenu="matMenu">
+        <div class="user-info">
+          <mat-icon>account_circle</mat-icon>
+          <div>{{ usuarioLogado }}</div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/minha-conta">
+          <mat-icon>settings</mat-icon>
+          <span>Minha Conta</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Sair</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <!-- Área de Conteúdo -->
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,164 @@
+<div class="historico-container">
+  <div class="header">
+    <h1>Histórico de Exportações</h1>
+    <button mat-flat-button color="accent" (click)="exportarRelatorio()">
+      <mat-icon>description</mat-icon>
+      Exportar Relatório
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <mat-expansion-panel class="filtros-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>filter_list</mat-icon>
+        Filtros
+      </mat-panel-title>
+      <mat-panel-description>
+        {{ dataInicio ? (dataInicio | date:'dd/MM/yyyy') : 'Sem filtro' }} - 
+        {{ dataFim ? (dataFim | date:'dd/MM/yyyy') : 'Sem filtro' }}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div class="filtros-content">
+      <mat-form-field appearance="outline">
+        <mat-label>Data Início</mat-label>
+        <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="dataInicio">
+        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+        <mat-datepicker #pickerInicio></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Data Fim</mat-label>
+        <input matInput [matDatepicker]="pickerFim" [(ngModel)]="dataFim">
+        <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFim></mat-datepicker>
+      </mat-form-field>
+
+      <div class="filtros-acoes">
+        <button mat-stroked-button (click)="limparFiltros()">
+          Limpar
+        </button>
+        <button mat-flat-button color="primary" (click)="aplicarFiltros()">
+          Aplicar
+        </button>
+      </div>
+    </div>
+  </mat-expansion-panel>
+
+  <!-- Barra de progresso -->
+  <mat-progress-bar mode="indeterminate" *ngIf="carregando"></mat-progress-bar>
+
+  <!-- Tabela -->
+  <div class="table-container mat-elevation-z2">
+    <table mat-table [dataSource]="historico">
+      
+      <!-- Data -->
+      <ng-container matColumnDef="data">
+        <th mat-header-cell *matHeaderCellDef>Data/Hora</th>
+        <td mat-cell *matCellDef="let item">
+          {{ formatarData(item.dataExportacao) }}
+        </td>
+      </ng-container>
+
+      <!-- Cliente (apenas admin) -->
+      <ng-container matColumnDef="cliente" *ngIf="isAdmin">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let item">
+          <div class="cliente-info">
+            <strong>{{ item.cliente?.razaoSocial }}</strong>
+            <small>{{ item.cliente?.cnpj }}</small>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Arquivo -->
+      <ng-container matColumnDef="arquivo">
+        <th mat-header-cell *matHeaderCellDef>Arquivo</th>
+        <td mat-cell *matCellDef="let item">
+          {{ item.nomeArquivo }}
+        </td>
+      </ng-container>
+
+      <!-- Quantidade -->
+      <ng-container matColumnDef="quantidade">
+        <th mat-header-cell *matHeaderCellDef>Leads</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-chip-listbox>
+            <mat-chip-option selected [disabled]="true">
+              {{ item.quantidadeLeads }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </td>
+      </ng-container>
+
+      <!-- Destino -->
+      <ng-container matColumnDef="destino">
+        <th mat-header-cell *matHeaderCellDef>Enviado para</th>
+        <td mat-cell *matCellDef="let item">
+          <div class="destino-info">
+            {{ item.emailDestino || 'Download direto' }}
+            <mat-icon *ngIf="item.enviadoPorEmail" 
+                      matTooltip="Enviado por email"
+                      class="email-icon">
+              email
+            </mat-icon>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-chip-listbox>
+            <mat-chip-option 
+              selected 
+              [disabled]="true"
+              [color]="getStatusColor(item.status)">
+              <mat-icon>{{ getStatusIcon(item.status) }}</mat-icon>
+              {{ item.status }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </td>
+      </ng-container>
+
+      <!-- Ações -->
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button 
+                  (click)="verDetalhes(item)"
+                  matTooltip="Ver detalhes">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button 
+                  (click)="reenviarEmail(item)"
+                  *ngIf="item.emailDestino && item.status === 'Concluido'"
+                  matTooltip="Reenviar email">
+            <mat-icon>send</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Mensagem quando não há dados -->
+    <div class="no-data" *ngIf="!carregando && historico.length === 0">
+      <mat-icon>history</mat-icon>
+      <p>Nenhuma exportação encontrada no período selecionado</p>
+    </div>
+  </div>
+
+  <!-- Paginador -->
+  <mat-paginator 
+    [length]="totalItens"
+    [pageSize]="tamanhoPagina"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    [pageIndex]="paginaAtual - 1"
+    (page)="mudarPagina($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+</div>

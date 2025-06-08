@@ -1,0 +1,23 @@
+# —— UI (Angular) ——
+# pasta do projeto Angular
+ui/leads-app/node_modules/
+ui/leads-app/dist/
+# se você usar .env na UI
+ui/leads-app/.env*
+# VS Code settings por pasta
+ui/.vscode/
+
+# —— API (.NET 8) ——
+# Visual Studio cache
+api/.vs/
+# binários e obj da solution e do projeto
+api/**/bin/
+api/**/obj/
+# arquivos de configuração locais
+api/Leads.API/appsettings*.json
+
+# —— Gerais ——
+# logs e ocultos de SO
+*.log
+*.user
+.DS_Store
