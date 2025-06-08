@@ -1,0 +1,68 @@
+// layout.component.scss
+
+.sidenav-container {
+  height: 100%;
+}
+
+.sidenav {
+  width: 250px;
+  box-shadow: 3px 0 6px rgba(0, 0, 0, 0.08);
+  
+  mat-toolbar {
+    background: #5e35b1;
+    color: white;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.toolbar-main {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.content-area {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+  background-color: #f5f5f5;
+}
+
+// Estilo para link ativo
+.active-link {
+  background-color: rgba(94, 53, 177, 0.1);
+  
+  mat-icon {
+    color: #5e35b1;
+  }
+}
+
+// Menu do usuário
+.user-info {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .sidenav {
+    width: 200px;
+  }
+  
+  .content-area {
+    padding: 16px;
+  }
+}

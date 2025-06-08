@@ -1,0 +1,127 @@
+<div class="clientes-container">
+  <div class="header">
+    <h1>Gerenciar Clientes</h1>
+    <button mat-flat-button color="primary" (click)="novoCliente()">
+      <mat-icon>add</mat-icon>
+      Novo Cliente
+    </button>
+  </div>
+
+  <!-- Barra de pesquisa -->
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Pesquisar cliente</mat-label>
+    <input matInput [(ngModel)]="busca" (keyup.enter)="pesquisar()" 
+           placeholder="Digite razão social, CNPJ ou email">
+    <mat-icon matSuffix (click)="pesquisar()" style="cursor: pointer">search</mat-icon>
+  </mat-form-field>
+
+  <!-- Barra de progresso -->
+  <mat-progress-bar mode="indeterminate" *ngIf="carregando"></mat-progress-bar>
+
+  <!-- Tabela de clientes -->
+  <div class="table-container mat-elevation-z2">
+    <table mat-table [dataSource]="clientes">
+      
+      <!-- Razão Social -->
+      <ng-container matColumnDef="razaoSocial">
+        <th mat-header-cell *matHeaderCellDef>Razão Social</th>
+        <td mat-cell *matCellDef="let cliente">
+          <div class="cliente-info">
+            <strong>{{ cliente.razaoSocial }}</strong>
+            <small *ngIf="cliente.nomeFantasia">{{ cliente.nomeFantasia }}</small>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- CNPJ -->
+      <ng-container matColumnDef="cnpj">
+        <th mat-header-cell *matHeaderCellDef>CNPJ</th>
+        <td mat-cell *matCellDef="let cliente">{{ formatarCNPJ(cliente.cnpj) }}</td>
+      </ng-container>
+
+      <!-- Email -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>E-mail</th>
+        <td mat-cell *matCellDef="let cliente">{{ cliente.email }}</td>
+      </ng-container>
+
+      <!-- Plano -->
+      <ng-container matColumnDef="plano">
+        <th mat-header-cell *matHeaderCellDef>Plano</th>
+        <td mat-cell *matCellDef="let cliente">
+          <mat-chip-listbox>
+            <mat-chip-option selected [disabled]="true">
+              {{ cliente.plano.nome }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let cliente">
+          <mat-chip-listbox>
+            <mat-chip-option 
+              selected 
+              [disabled]="true"
+              [color]="getStatusColor(cliente.statusPagamento)">
+              {{ cliente.statusPagamento }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </td>
+      </ng-container>
+
+      <!-- Exportações -->
+      <ng-container matColumnDef="exportacoes">
+        <th mat-header-cell *matHeaderCellDef>Exportações/Mês</th>
+        <td mat-cell *matCellDef="let cliente">
+          {{ cliente.exportacoesRealizadasMes }}
+        </td>
+      </ng-container>
+
+      <!-- Ações -->
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let cliente">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editarCliente(cliente)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="alterarPlano(cliente)">
+              <mat-icon>card_membership</mat-icon>
+              <span>Alterar Plano</span>
+            </button>
+            <button mat-menu-item (click)="excluirCliente(cliente)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Excluir</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Mensagem quando não há dados -->
+    <div class="no-data" *ngIf="!carregando && clientes.length === 0">
+      <mat-icon>business</mat-icon>
+      <p>Nenhum cliente encontrado</p>
+    </div>
+  </div>
+
+  <!-- Paginador -->
+  <mat-paginator 
+    [length]="totalItens"
+    [pageSize]="tamanhoPagina"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    [pageIndex]="paginaAtual - 1"
+    (page)="mudarPagina($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+</div>

@@ -1,0 +1,16 @@
+# —— UI (Angular) ——
+ui/leads-app/node_modules/
+ui/leads-app/dist/
+ui/leads-app/.env*
+ui/.vscode/
+
+# —— API (.NET 8) ——
+api/.vs/
+api/**/bin/
+api/**/obj/
+api/Leads.API/appsettings*.json
+
+# —— Gerais ——
+*.log
+*.user
+.DS_Store

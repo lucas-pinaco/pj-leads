@@ -1,0 +1,12 @@
+@use '@angular/material' as mat;
+
+$pj-theme: mat.define-light-theme((
+  color: (
+    primary: mat.$deep-purple-palette,
+    accent: mat.$purple-palette,
+    warn: mat.$red-palette
+  )
+));
+
+@include mat.core();
+@include mat.all-component-themes($pj-theme);

@@ -1,0 +1,171 @@
+.planos-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 32px;
+  }
+}
+
+.planos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+mat-card {
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  &.plano-destaque {
+    border: 2px solid #5e35b1;
+    transform: scale(1.05);
+    
+    &:hover {
+      transform: scale(1.05) translateY(-4px);
+    }
+  }
+}
+
+.badge-destaque {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: #5e35b1;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.preco {
+  text-align: center;
+  margin: 24px 0;
+
+  .valor {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .periodo {
+    font-size: 18px;
+    color: #666;
+  }
+}
+
+.recursos {
+  margin: 24px 0;
+
+  h3 {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 16px;
+  }
+
+  .recurso {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    mat-icon {
+      color: #5e35b1;
+    }
+
+    span {
+      color: #333;
+    }
+  }
+}
+
+.limites {
+  margin: 24px 0;
+
+  mat-chip-listbox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  mat-chip-option {
+    pointer-events: none;
+    
+    mat-icon {
+      margin-right: 4px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+mat-card-actions {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+
+  .btn-selecionar {
+    width: 100%;
+    height: 48px;
+    font-size: 16px;
+  }
+}
+
+.carregando {
+  text-align: center;
+  padding: 48px;
+  color: #666;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .planos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  mat-card.plano-destaque {
+    transform: scale(1);
+    
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+}
