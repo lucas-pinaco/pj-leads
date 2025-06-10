@@ -69,7 +69,7 @@ namespace Leads.API.API.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
-                // new Claim("role", usuario.Role ?? "User"), // se estiver usando roles
+                new Claim("perfil", usuario.Perfil ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -90,8 +90,9 @@ namespace Leads.API.API.Controllers
             return Ok(new
             {
                 token = tokenString,
-                expiracao = token.ValidTo
-            });
+                expiracao = token.ValidTo,
+                perfil = usuario.Perfil
+        });
         }
 
         [HttpPost("register")]

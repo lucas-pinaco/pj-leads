@@ -1,11 +1,11 @@
 import {
   BrowserModule,
   DomRendererFactory2
-} from "./chunk-32JLOGTL.js";
-import "./chunk-HVXT7Y2J.js";
+} from "./chunk-ZTVQ66G4.js";
+import "./chunk-EUXUQ4RX.js";
 import {
   DOCUMENT
-} from "./chunk-BXVU4ZYJ.js";
+} from "./chunk-MDVXPLA5.js";
 import {
   ANIMATION_MODULE_TYPE,
   Inject,
@@ -21,8 +21,8 @@ import {
   ɵɵdefineNgModule,
   ɵɵinject
 } from "./chunk-GDOUC7VZ.js";
-import "./chunk-WPM5VTLQ.js";
 import "./chunk-PEBH6BBU.js";
+import "./chunk-WPM5VTLQ.js";
 import "./chunk-4S3KYZTJ.js";
 import {
   __objRest,

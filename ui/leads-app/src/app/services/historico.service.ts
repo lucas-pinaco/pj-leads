@@ -41,6 +41,8 @@ export class HistoricoService {
     dataFim?: Date,
     clienteId?: number
   ): Observable<any> {
+
+    debugger
     let params = new HttpParams()
       .set('pagina', pagina.toString())
       .set('tamanhoPagina', tamanhoPagina.toString());

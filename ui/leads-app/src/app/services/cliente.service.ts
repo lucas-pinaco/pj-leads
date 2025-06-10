@@ -99,9 +99,9 @@ export class ClienteService {
     return this.http.post<Cliente>(`${this.baseUrl}/clientes`, cliente);
   }
 
-  atualizarCliente(id: number, cliente: Partial<Cliente>): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/clientes/${id}`, cliente);
-  }
+ atualizarCliente(id: number, cliente: Partial<Cliente>): Observable<Cliente> {
+  return this.http.put<Cliente>(`${this.baseUrl}/clientes/${id}`, cliente);
+}
 
   excluirCliente(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/clientes/${id}`);
