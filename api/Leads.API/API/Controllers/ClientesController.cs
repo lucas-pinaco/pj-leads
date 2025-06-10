@@ -224,7 +224,38 @@ namespace Leads.API.API.Controllers
                 .ThenInclude(c => c.Plano)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (usuario?.Cliente == null)
+            if (usuario == null)
+                return NotFound(new { message = "Usuário não encontrado." });
+
+            // Se for admin, retornar informações especiais
+            if (usuario.Perfil == "Admin")
+            {
+                return Ok(new
+                {
+                    Cliente = new
+                    {
+                        Id = 0,
+                        RazaoSocial = "Administrador",
+                        NomeFantasia = "Admin",
+                        CNPJ = "00000000000000",
+                        Email = usuario.Email,
+                        StatusPagamento = "Admin",
+                        DataVencimento = (DateTime?)null
+                    },
+                    Plano = new
+                    {
+                        Id = 0,
+                        Nome = "Administrador",
+                        LimiteExportacoesMes = -1,
+                        LimiteLeadsPorExportacao = int.MaxValue,
+                        ExportacoesUtilizadas = 0,
+                        ExportacoesDisponiveis = "Ilimitado"
+                    },
+                    IsAdmin = true
+                });
+            }
+
+            if (usuario.Cliente == null)
                 return NotFound(new { message = "Cliente não encontrado para este usuário." });
 
             var exportacoesDoMes = await _context.HistoricoExportacoes
@@ -255,7 +286,8 @@ namespace Leads.API.API.Controllers
                     ExportacoesDisponiveis = usuario.Cliente.Plano.LimiteExportacoesMes == -1
                         ? "Ilimitado"
                         : (usuario.Cliente.Plano.LimiteExportacoesMes - exportacoesDoMes).ToString()
-                }
+                },
+                IsAdmin = false
             });
         }
 

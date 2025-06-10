@@ -13,20 +13,11 @@ public class ExportacaoController : ControllerBase
         _emailService = emailService;
     }
 
-    //[HttpPost("exportar")]
-    //public async Task<IActionResult> Exportar([FromBody] ExportarLeadsRequest request)
-    //{
-    //    var arquivo = await _exportacaoService.ExportarLeadsAsync(request.IncluirDuplicados, request.Quantidade);
-
-    //    await _emailService.EnviarArquivoPorEmailAsync(request.EmailDestino, arquivo, request.NomeArquivo);
-
-    //    return Ok("Arquivo exportado e enviado com sucesso");
-    //}
 
     [HttpPost("exportar")]
     public async Task<IActionResult> Exportar([FromBody] ExportarLeadsRequest request)
     {
-        var arquivo = await _exportacaoService.ExportarLeadsAsync(request.IncluirDuplicados, request.Quantidade);
+        var arquivo = await _exportacaoService.ExportarLeadsAsync(request);
 
         return File(arquivo,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

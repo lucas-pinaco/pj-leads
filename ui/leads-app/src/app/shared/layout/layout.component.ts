@@ -85,14 +85,23 @@ export class LayoutComponent {
   ) {}
 
   get usuarioLogado(): string {
-    // Implementar lógica para pegar nome do usuário
+    // Pega do localStorage ou do token
+    const profile = localStorage.getItem('userProfile');
+    if (profile) {
+      try {
+        const data = JSON.parse(profile);
+        return data.email || 'Usuário';
+      } catch (e) {
+        return 'Usuário';
+      }
+    }
     return 'Usuário';
   }
 
   get isAdmin(): boolean {
-    // Implementar lógica para verificar se é admin
-    // Por enquanto, retorna true para testes
-    return true;
+    // Verifica o perfil do usuário
+    const perfil = this.authService.getUserPerfil();
+    return perfil === 'Admin';
   }
 
   menuFiltrado(): MenuItem[] {

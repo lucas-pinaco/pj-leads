@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ExportacaoService } from '../../services/exportacao.service';
+import { ClienteService } from '../../services/cliente.service';
 import { saveAs } from 'file-saver';
 
 // Angular Material Modules
@@ -12,6 +13,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   standalone: true,
@@ -27,10 +31,17 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatButtonModule,
     MatToolbarModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatCardModule,
+    MatChipsModule,
+    MatIconModule
   ],
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  meuPerfil: any = null;
+  carregandoPerfil = true;
+  isAdmin = false;
+
   filtros = {
     RazaoOuFantasia: '',
     CNAE: '',
@@ -61,7 +72,49 @@ export class HomeComponent {
 
   situacoes = ['ATIVA', 'BAIXADA', 'INAPTA', 'SUSPENSA'];
 
-  constructor(private exportacaoService: ExportacaoService) {}
+  constructor(
+    private exportacaoService: ExportacaoService,
+    private clienteService: ClienteService
+  ) {}
+
+  ngOnInit(): void {
+    this.carregarPerfil();
+  }
+
+  carregarPerfil(): void {
+    this.clienteService.obterMeuPerfil().subscribe({
+      next: (perfil: any) => {
+        this.meuPerfil = perfil;
+        this.isAdmin = perfil.isAdmin || false;
+        this.carregandoPerfil = false;
+        
+        // Admin não tem limite, outros usuários sim
+        if (!this.isAdmin && perfil.plano.limiteLeadsPorExportacao < this.filtros.Quantidade) {
+          this.filtros.Quantidade = perfil.plano.limiteLeadsPorExportacao;
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar perfil:', err);
+        this.carregandoPerfil = false;
+      }
+    });
+  }
+
+  get limiteAtingido(): boolean {
+    // Admin nunca tem limite atingido
+    if (this.isAdmin) return false;
+    
+    if (!this.meuPerfil) return false;
+    
+    const limite = this.meuPerfil.plano.limiteExportacoesMes;
+    const utilizadas = this.meuPerfil.plano.exportacoesUtilizadas;
+    
+    return limite !== -1 && utilizadas >= limite;
+  }
+
+  get podeExportar(): boolean {
+    return !this.carregandoPerfil && (this.isAdmin || !this.limiteAtingido);
+  }
 
   toggleSituacao(situacao: string) {
     const index = this.filtros.SituacoesCadastrais.indexOf(situacao);
@@ -73,6 +126,11 @@ export class HomeComponent {
   }
 
   exportar() {
+    if (!this.podeExportar) {
+      alert('Você atingiu o limite de exportações do seu plano.');
+      return;
+    }
+
     const f = this.filtros;
   
     const filtrosCorrigidos = {
@@ -92,11 +150,12 @@ export class HomeComponent {
     this.exportacaoService.exportarLeads(filtrosCorrigidos).subscribe({
       next: (blob) => {
         saveAs(blob, 'leads-exportados.xlsx');
+        // Recarregar perfil para atualizar contador
+        this.carregarPerfil();
       },
       error: (err) => {
-        debugger
         console.error('Erro ao exportar:', err);
-        alert('Erro ao exportar leads. Verifique os filtros.');
+        alert(err.error?.message || 'Erro ao exportar leads. Verifique os filtros.');
       }
     });
   }

@@ -1,5 +1,51 @@
+<div class="container">
+    <!-- Card de Informações do Plano -->
+    <mat-card class="plano-info" appearance="outlined" *ngIf="meuPerfil && !carregandoPerfil">
+      <mat-card-header>
+        <mat-card-title>
+          Seu Plano: {{ meuPerfil.plano.nome }}
+          <mat-chip-listbox *ngIf="isAdmin" class="admin-badge">
+            <mat-chip-option selected [disabled]="true" color="accent">
+              <mat-icon>verified_user</mat-icon>
+              Acesso Total
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="plano-stats">
+          <div class="stat">
+            <mat-icon>download</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">{{ isAdmin ? '∞' : meuPerfil.plano.exportacoesUtilizadas }}</span>
+              <span class="stat-label">Exportações realizadas</span>
+            </div>
+          </div>
+          <div class="stat">
+            <mat-icon>inventory_2</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">{{ meuPerfil.plano.exportacoesDisponiveis }}</span>
+              <span class="stat-label">Exportações disponíveis</span>
+            </div>
+          </div>
+          <div class="stat">
+            <mat-icon>group</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">{{ isAdmin ? '∞' : meuPerfil.plano.limiteLeadsPorExportacao }}</span>
+              <span class="stat-label">Leads por exportação</span>
+            </div>
+          </div>
+        </div>
+        
+        <mat-chip-listbox *ngIf="limiteAtingido && !isAdmin" class="aviso-limite">
+          <mat-chip-option selected [disabled]="true" color="warn">
+            <mat-icon>warning</mat-icon>
+            Limite mensal atingido
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </mat-card-content>
+    </mat-card>
 
-  <div class="container">
     <h2>Exportar Leads</h2>
   
     <form (ngSubmit)="exportar()" #f="ngForm" class="form-grid">
@@ -110,25 +156,35 @@
       <div class="form-row">
         <mat-form-field appearance="fill">
           <mat-label>Quantidade</mat-label>
-          <input matInput type="number" [(ngModel)]="filtros.Quantidade" name="quantidade" />
+          <input matInput type="number" 
+                 [(ngModel)]="filtros.Quantidade" 
+                 name="quantidade"
+                 [max]="isAdmin ? 999999 : (meuPerfil?.plano?.limiteLeadsPorExportacao || 1000)" />
+          <mat-hint *ngIf="meuPerfil && !isAdmin">Máximo: {{ meuPerfil.plano.limiteLeadsPorExportacao }} leads</mat-hint>
+          <mat-hint *ngIf="isAdmin">Sem limite de quantidade</mat-hint>
         </mat-form-field>
   
         <mat-checkbox [(ngModel)]="filtros.IncluirDuplicados" name="duplicados">Incluir Duplicados</mat-checkbox>
       </div>
-      <div class="form-row">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>E-mail para envio</mat-label>
-        <input matInput [(ngModel)]="filtros.EmailDestino" name="emailDestino" />
-      </mat-form-field>
       
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Nome do arquivo</mat-label>
-        <input matInput [(ngModel)]="filtros.NomeArquivo" name="nomeArquivo" />
-      </mat-form-field>
-    </div>
       <div class="form-row">
-        <button mat-raised-button color="primary" type="submit">Exportar Excel</button>
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>E-mail para envio</mat-label>
+          <input matInput [(ngModel)]="filtros.EmailDestino" name="emailDestino" />
+        </mat-form-field>
+        
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Nome do arquivo</mat-label>
+          <input matInput [(ngModel)]="filtros.NomeArquivo" name="nomeArquivo" />
+        </mat-form-field>
+      </div>
+      
+      <div class="form-row">
+        <button mat-raised-button color="primary" type="submit" [disabled]="!podeExportar">
+          <mat-icon *ngIf="limiteAtingido">block</mat-icon>
+          <span *ngIf="!limiteAtingido">Exportar Excel</span>
+          <span *ngIf="limiteAtingido">Limite Atingido</span>
+        </button>
       </div>
     </form>
   </div>
-  
