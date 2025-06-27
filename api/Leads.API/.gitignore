@@ -1,0 +1,36 @@
+﻿# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.pdb
+*.exe
+.vs/
+.vscode/
+
+# Environment files
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node.js (se houver frontend)
+node_modules/
+dist/
+.env*
+
+# Railway
+.railway/

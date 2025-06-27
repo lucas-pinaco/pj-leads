@@ -21,12 +21,6 @@ if (environment == "Development")
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Converter Railway DATABASE_URL para formato EF Core se necessário
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
-{
-    connectionString = ConvertPostgresUrlToConnectionString(connectionString);
-}
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -38,7 +32,7 @@ builder.Services.Configure<JwtSettings>(jwtSection);
 var jwtSettings = jwtSection.Get<JwtSettings>();
 
 // Usar variável de ambiente se disponível
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? jwtSettings!.Secret;
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? jwtSettings.Secret;
 var key = Encoding.ASCII.GetBytes(jwtSecret);
 
 builder.Services.AddAuthentication(options =>
@@ -93,6 +87,12 @@ builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<IBackgroundJobService, BackgroundJobService>();
 
 builder.Services.AddHttpContextAccessor();
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+
+builder.Services.AddHealthChecks();
 
 // CORS - Configuração mais flexível para produção
 builder.Services.AddCors(options =>
@@ -181,19 +181,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ImportProgressHub>("/hub/import-progress");
-
-// Função para converter URL do Railway para connection string
-static string ConvertPostgresUrlToConnectionString(string databaseUrl)
-{
-    var uri = new Uri(databaseUrl);
-    var host = uri.Host;
-    var port = uri.Port;
-    var database = uri.LocalPath.TrimStart('/');
-    var userInfo = uri.UserInfo.Split(':');
-    var username = userInfo[0];
-    var password = userInfo.Length > 1 ? userInfo[1] : "";
-
-    return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
-}
+app.MapHealthChecks("/health");
 
 app.Run();
