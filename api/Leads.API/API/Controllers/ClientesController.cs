@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Leads.API.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Leads.API.Domain.Entities;
 using System;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Leads.API.API.Controllers
 {
@@ -44,31 +45,31 @@ namespace Leads.API.API.Controllers
             var totalPaginas = (int)Math.Ceiling(totalItens / (double)tamanhoPagina);
 
             var clientes = await query
-                .OrderBy(c => c.RazaoSocial)
-                .Skip((pagina - 1) * tamanhoPagina)
-                .Take(tamanhoPagina)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.RazaoSocial,
-                    c.NomeFantasia,
-                    c.CNPJ,
-                    c.Email,
-                    c.Telefone,
-                    c.DataCadastro,
-                    c.Ativo,
-                    Plano = new
-                    {
-                        c.Plano.Id,
-                        c.Plano.Nome,
-                        c.Plano.Valor
-                    },
-                    c.ExportacoesRealizadasMes,
-                    c.StatusPagamento,
-                    c.DataVencimento,
-                    TotalUsuarios = c.Usuarios.Count()
-                })
-                .ToListAsync();
+                  .OrderBy(c => c.RazaoSocial)
+                  .Skip((pagina - 1) * tamanhoPagina)
+                  .Take(tamanhoPagina)
+                  .Select(c => new
+                  {
+                      c.Id,
+                      c.RazaoSocial,
+                      NomeFantasia = c.NomeFantasia ?? "",
+                      c.CNPJ,
+                      Email = c.Email ?? "",
+                      Telefone = c.Telefone ?? "",
+                      c.DataCadastro,
+                      c.Ativo,
+                      Plano = new
+                      {
+                          c.Plano.Id,
+                          Nome = c.Plano.Nome ?? "",
+                          c.Plano.Valor
+                      },
+                      c.ExportacoesRealizadasMes,
+                      StatusPagamento = c.StatusPagamento ?? "",
+                      c.DataVencimento,
+                      TotalUsuarios = c.Usuarios.Count()
+                  })
+                  .ToListAsync();
 
             return Ok(new
             {
@@ -215,7 +216,7 @@ namespace Leads.API.API.Controllers
         public async Task<IActionResult> MeuPerfil()
         {
             // Pegar o usuário logado do token
-            var userIdClaim = User.FindFirst("sub")?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface HistoricoExportacao {
   id: number;
@@ -30,7 +31,7 @@ export interface HistoricoExportacao {
   providedIn: 'root'
 })
 export class HistoricoService {
-  private baseUrl = '/api/historico';
+  private baseUrl = `${environment.apiUrl}/historico`;
 
   constructor(private http: HttpClient) {}
 
@@ -41,8 +42,6 @@ export class HistoricoService {
     dataFim?: Date,
     clienteId?: number
   ): Observable<any> {
-
-    debugger
     let params = new HttpParams()
       .set('pagina', pagina.toString())
       .set('tamanhoPagina', tamanhoPagina.toString());
@@ -59,7 +58,7 @@ export class HistoricoService {
       params = params.set('clienteId', clienteId.toString());
     }
 
-    return this.http.get<any>(`${this.baseUrl}`, { params });
+    return this.http.get<any>(this.baseUrl, { params });
   }
 
   obterDetalhes(id: number): Observable<HistoricoExportacao> {

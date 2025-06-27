@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Plano {
   id: number;
@@ -65,7 +66,7 @@ export interface MeuPerfil {
   providedIn: 'root'
 })
 export class ClienteService {
-  private baseUrl = '/api';
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

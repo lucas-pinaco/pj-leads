@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -49,12 +49,12 @@ export class LayoutComponent {
       rota: '/admin/importar',
       perfil: 'Admin'
     },
-    {
-      titulo: 'Gerenciar Arquivos',
-      icone: 'folder',
-      rota: '/admin/arquivos',
-      perfil: 'Admin'
-    },
+    // {
+    //   titulo: 'Gerenciar Arquivos',
+    //   icone: 'folder',
+    //   rota: '/admin/arquivos',
+    //   perfil: 'Admin'
+    // },
     {
       titulo: 'Clientes',
       icone: 'people',

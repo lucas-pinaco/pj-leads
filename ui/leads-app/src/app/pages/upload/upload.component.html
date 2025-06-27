@@ -1,0 +1,400 @@
+<div class="upload-container">
+  <!-- Header Section -->
+  <div class="upload-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <polyline points="7,10 12,15 17,10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1 class="header-title">Importar Leads</h1>
+        <p class="header-subtitle">Faça upload de arquivos CSV ou Excel para importar novos leads</p>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid" *ngIf="statistics">
+      <div class="stat-card">
+        <div class="stat-icon success">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4900 2.02168 11.3363C2.16356 9.18258 2.99721 7.13677 4.39828 5.49707C5.79935 3.85736 7.69279 2.71548 9.79619 2.24015C11.8996 1.76482 14.1003 1.98455 16.07 2.86"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.totalArquivos | number }}</div>
+          <div class="stat-label">Arquivos Processados</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M16 21V7C16 5.89543 15.1046 5 14 5H6C4.89543 5 4 5.89543 4 7V21" stroke="currentColor"
+              stroke-width="2" />
+            <path d="M20 21V11C20 9.89543 19.1046 9 18 9H16" stroke="currentColor" stroke-width="2" />
+            <circle cx="12" cy="16" r="2" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.totalLeads | number }}</div>
+          <div class="stat-label">Leads Importados</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon warning">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+            <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" />
+            <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.arquivosComErro | number }}</div>
+          <div class="stat-label">Com Erros</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <div class="upload-card">
+      <div class="upload-zone" [class.drag-over]="isDragOver" [class.has-files]="selectedFiles.length > 0"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
+        (click)="fileInput.click()">
+
+        <input #fileInput type="file" multiple accept=".csv,.xlsx,.xls" (change)="onFileSelect($event)"
+          style="display: none;">
+
+        <div class="upload-content" *ngIf="selectedFiles.length === 0">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
+                stroke="currentColor" stroke-width="2" />
+              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" />
+              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" />
+              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" />
+              <polyline points="10,9 9,9 8,9" stroke="currentColor" stroke-width="2" />
+            </svg>
+          </div>
+          <h3 class="upload-title">Arraste arquivos aqui ou clique para selecionar</h3>
+          <p class="upload-description">
+            Formatos aceitos: CSV, XLSX, XLS<br>
+            Tamanho máximo: 50MB por arquivo
+          </p>
+          <button class="btn-select-files">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor"
+                stroke-width="2" />
+              <polyline points="17,8 12,3 7,8" stroke="currentColor" stroke-width="2" />
+              <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" />
+            </svg>
+            Selecionar Arquivos
+          </button>
+        </div>
+
+        <!-- File List -->
+        <div class="file-list" *ngIf="selectedFiles.length > 0">
+          <div class="file-list-header">
+            <h3>Arquivos Selecionados ({{ selectedFiles.length }})</h3>
+            <button class="btn-clear" (click)="clearFiles()" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
+                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" />
+              </svg>
+              Limpar
+            </button>
+          </div>
+          <div class="files-container">
+            <div class="file-item" *ngFor="let fileItem of selectedFiles; trackBy: trackFile; let i = index">
+              <div class="file-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
+                    stroke="currentColor" stroke-width="2" />
+                  <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </div>
+
+              <div class="file-info">
+                <div class="file-name">{{ fileItem.file.name }}</div>
+                <div class="file-details">
+                  <span class="file-size">{{ formatFileSize(fileItem.file.size) }}</span>
+                  <span class="file-type">{{ getFileType(fileItem.file.name) }}</span>
+                </div>
+
+                <div class="file-status" *ngIf="fileItem.status && fileItem.status !== 'selected'">
+                  <span class="status-badge" [ngClass]="'status-' + fileItem.status">
+                    {{ getFileStatusText(fileItem.status) }}
+                  </span>
+                </div>
+              </div>
+
+              <button class="file-remove" (click)="removeFile(fileItem)" type="button"
+                [attr.aria-label]="'Remover arquivo ' + fileItem.file.name">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Upload Actions -->
+      <div class="upload-actions" *ngIf="selectedFiles.length > 0">
+        <div class="upload-options">
+          <label class="checkbox-option">
+            <input type="checkbox" [(ngModel)]="useBackgroundProcessing">
+            <span class="checkmark"></span>
+            <span class="option-text">
+              Processamento em background
+              <small>Recomendado para arquivos grandes</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-secondary" (click)="clearFiles()" type="button">
+            Cancelar
+          </button>
+          <button class="btn-primary" (click)="startUpload()" [disabled]="isUploading">
+            <div class="btn-content" *ngIf="!isUploading">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor"
+                  stroke-width="2" />
+                <polyline points="17,8 12,3 7,8" stroke="currentColor" stroke-width="2" />
+                <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" />
+              </svg>
+              Iniciar Importação
+            </div>
+            <div class="btn-loading" *ngIf="isUploading">
+              <div class="spinner"></div>
+              Enviando...
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Jobs Section -->
+  <div class="jobs-section" *ngIf="activeJobs.length > 0">
+    <div class="section-header">
+      <h2 class="section-title">Importações em Andamento</h2>
+      <button class="btn-refresh" (click)="refreshJobs()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <polyline points="23,4 23,10 17,10" stroke="currentColor" stroke-width="2" />
+          <path
+            d="M20.49 15C19.9828 16.8454 18.8627 18.4671 17.3209 19.5956C15.7791 20.7241 13.9145 21.2909 12.0128 21.2042C10.1111 21.1175 8.3073 20.3821 6.87823 19.1058C5.44916 17.8295 4.38446 16.0831 3.85246 14.1223C3.32046 12.1615 3.34517 10.0795 3.92418 8.133C4.50319 6.18652 5.6077 4.47524 7.08927 3.23521C8.57085 1.99518 10.4026 1.29907 12.3118 1.2393C14.2209 1.17954 16.0964 1.76233 17.66 2.9"
+            stroke="currentColor" stroke-width="2" />
+          <polyline points="1,20 1,14 7,14" stroke="currentColor" stroke-width="2" />
+        </svg>
+        Atualizar
+      </button>
+    </div>
+
+    <div class="jobs-list">
+      <div class="job-card" *ngFor="let job of activeJobs">
+        <div class="job-header">
+          <div class="job-info">
+            <div class="job-title">Job #{{ job.jobId.substring(0, 8) }}</div>
+            <div class="job-meta">
+              <span class="job-time">{{ formatJobTime(job.iniciado) }}</span>
+              <span class="job-separator">•</span>
+              <span class="job-files">{{ job.totalArquivos }} arquivo(s)</span>
+            </div>
+          </div>
+          <div class="job-status" [ngClass]="getJobStatusClass(job.status)">
+            <div class="status-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" *ngIf="job.status === 'Processando'">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" />
+              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" *ngIf="job.status === 'Concluido'">
+                <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" />
+              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" *ngIf="job.status === 'Erro'">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2" />
+                <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2" />
+              </svg>
+            </div>
+            <span class="status-text">{{ getJobStatusText(job.status) }}</span>
+          </div>
+        </div>
+
+        <div class="job-progress" *ngIf="job.status === 'Processando' || job.status === 'Iniciado'">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="job.progressoPercentual"></div>
+          </div>
+          <div class="progress-text">
+            <span>{{ job.leadsProcessados | number }} / {{ job.totalLeads | number }} leads</span>
+            <span>{{ job.progressoPercentual }}%</span>
+          </div>
+        </div>
+
+        <div class="job-files" *ngIf="job.arquivos && job.arquivos.length > 0">
+          <div class="file-progress" *ngFor="let arquivo of job.arquivos">
+            <div class="file-progress-header">
+              <span class="file-progress-name">{{ arquivo.nome }}</span>
+              <span class="file-progress-status" [ngClass]="getFileStatusClass(arquivo.status)">
+                {{ getFileStatusText(arquivo.status) }}
+              </span>
+            </div>
+            <div class="file-progress-bar" *ngIf="arquivo.status === 'Processando'">
+              <div class="progress-fill" [style.width.%]="arquivo.progressoPercentual || 0"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="job-error" *ngIf="job.mensagemErro">
+          <div class="error-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" />
+              <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" />
+            </svg>
+          </div>
+          <span class="error-text">{{ job.mensagemErro }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Files Section -->
+  <div class="files-section">
+    <div class="section-header">
+      <h2 class="section-title">Arquivos Recentes</h2>
+      <button class="btn-view-all" routerLink="/admin/historico-arquivos">
+        Ver Todos
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <line x1="7" y1="17" x2="17" y2="7" stroke="currentColor" stroke-width="2" />
+          <polyline points="7,7 17,7 17,17" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="files-table">
+      <div class="table-header">
+        <div class="table-col col-file">Arquivo</div>
+        <div class="table-col col-date">Data</div>
+        <div class="table-col col-leads">Leads</div>
+        <div class="table-col col-status">Status</div>
+        <div class="table-col col-actions">Ações</div>
+      </div>
+
+      <div class="table-body">
+        <div class="table-row" *ngFor="let arquivo of recentFiles">
+          <div class="table-cell col-file">
+            <div class="file-cell">
+              <div class="file-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
+                    stroke="currentColor" stroke-width="2" />
+                  <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </div>
+              <div class="file-details">
+                <div class="file-name">{{ arquivo.nome }}</div>
+                <div class="file-size">{{ arquivo.tamanhoFormatado }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-cell col-date">
+            {{ arquivo.dataUpload | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+
+          <div class="table-cell col-leads">
+            <span *ngIf="arquivo.quantidadeLeads; else noLeads">
+              {{ arquivo.quantidadeLeads | number }}
+            </span>
+            <ng-template #noLeads>-</ng-template>
+          </div>
+
+          <div class="table-cell col-status">
+            <div class="status-badge" [ngClass]="getFileStatusClass(arquivo)">
+              <div class="status-dot"></div>
+              <span>{{ getFileStatusText(arquivo) }}</span>
+            </div>
+          </div>
+
+          <div class="table-cell col-actions">
+            <div class="action-buttons">
+              <button class="btn-action" (click)="downloadFile(arquivo)" title="Download">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor"
+                    stroke-width="2" />
+                  <polyline points="7,10 12,15 17,10" stroke="currentColor" stroke-width="2" />
+                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </button>
+              <button class="btn-action" (click)="reprocessFile(arquivo)" *ngIf="arquivo.processado"
+                title="Reprocessar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <polyline points="23,4 23,10 17,10" stroke="currentColor" stroke-width="2" />
+                  <path
+                    d="M20.49 15C19.9828 16.8454 18.8627 18.4671 17.3209 19.5956C15.7791 20.7241 13.9145 21.2909 12.0128 21.2042C10.1111 21.1175 8.3073 20.3821 6.87823 19.1058C5.44916 17.8295 4.38446 16.0831 3.85246 14.1223C3.32046 12.1615 3.34517 10.0795 3.92418 8.133C4.50319 6.18652 5.6077 4.47524 7.08927 3.23521C8.57085 1.99518 10.4026 1.29907 12.3118 1.2393C14.2209 1.17954 16.0964 1.76233 17.66 2.9"
+                    stroke="currentColor" stroke-width="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alert success" *ngIf="successMessage" [@slideIn]>
+    <div class="alert-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" />
+      </svg>
+    </div>
+    <div class="alert-content">
+      <div class="alert-title">Sucesso!</div>
+      <div class="alert-message">{{ successMessage }}</div>
+    </div>
+    <button class="alert-close" (click)="clearMessage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
+        <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="alert error" *ngIf="errorMessage" [@slideIn]>
+    <div class="alert-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+        <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2" />
+        <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2" />
+      </svg>
+    </div>
+    <div class="alert-content">
+      <div class="alert-title">Erro</div>
+      <div class="alert-message">{{ errorMessage }}</div>
+    </div>
+    <button class="alert-close" (click)="clearMessage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
+        <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" />
+      </svg>
+    </button>
+  </div>

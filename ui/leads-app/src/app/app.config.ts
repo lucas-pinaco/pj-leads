@@ -13,13 +13,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { AuthGuard } from './auth/auth.guard';
-import { AuthService } from './auth/auth.service';
-import { AdminService } from './admin/admin.service';
+import { AuthService } from './services/auth.service';
+import { AdminService } from './services/admin.service';
+import { authInterceptor } from './auth/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }), 
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    ),
     provideAnimations(),
     importProvidersFrom(
       FormsModule,

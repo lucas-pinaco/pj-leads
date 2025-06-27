@@ -1,12 +1,13 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/login/login.component';
+import { LoginComponent } from './pages/login/login.component';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './auth/admin.guard';
 import { LayoutComponent } from './shared/layout/layout.component';
 import { HomeComponent } from './pages/home/home.component';
-import { UploadComponent } from './admin/upload/upload.component';
-import { ClientesComponent } from './admin/clientes/clientes.component';
-import { PlanosComponent } from './admin/planos/planos.component';
+import { ExportarComponent } from './pages/exportar/exportar.component';
+import { UploadComponent } from './pages/upload/upload.component';
+import { ClientesComponent } from './pages/clientes/clientes.component';
+import { PlanosComponent } from './pages/planos/planos.component';
 import { HistoricoComponent } from './pages/historico/historico.component';
 
 export const routes: Routes = [
@@ -21,12 +22,16 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'exportar',
+        redirectTo: 'home',
         pathMatch: 'full'
       },
       {
-        path: 'exportar',
+        path: 'home',
         component: HomeComponent
+      },
+      {
+        path: 'exportar',
+        component: ExportarComponent
       },
       {
         path: 'historico',

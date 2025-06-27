@@ -1,30 +1,155 @@
-﻿using global::Leads.API.Domain.Entities;
+﻿using Leads.API.Application.Services;
+using Leads.API.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Leads.API.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ImportacaoService _importacaoService;
+        private readonly IBackgroundJobService _backgroundJobService;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(AppDbContext context, ImportacaoService importacaoService)
+        public AdminController(
+            AppDbContext context,
+            IBackgroundJobService backgroundJobService,
+            ILogger<AdminController> logger)
         {
             _context = context;
-            _importacaoService = importacaoService;
+            _backgroundJobService = backgroundJobService;
+            _logger = logger;
         }
 
         /// <summary>
-        /// Faz upload de um ou mais arquivos e processa os leads
+        /// Upload com processamento em background
+        /// </summary>
+        [HttpPost("upload-background")]
+        public async Task<IActionResult> UploadBackground()
+        {
+            var arquivos = Request.Form.Files;
+            if (arquivos == null || arquivos.Count == 0)
+            {
+                return BadRequest(new { message = "Nenhum arquivo foi enviado." });
+            }
+
+            // Validar arquivos
+            var arquivosValidos = new List<ArquivoUpload>();
+            var erros = new List<string>();
+
+            foreach (var formFile in arquivos)
+            {
+                if (formFile.Length == 0)
+                {
+                    erros.Add($"Arquivo {formFile.FileName} está vazio.");
+                    continue;
+                }
+
+                var ext = Path.GetExtension(formFile.FileName).ToLower();
+                if (ext != ".csv" && ext != ".xlsx" && ext != ".xls")
+                {
+                    erros.Add($"Arquivo {formFile.FileName} não é um formato suportado (CSV, XLSX, XLS).");
+                    continue;
+                }
+
+                // Limite de 50MB por arquivo
+                if (formFile.Length > 50 * 1024 * 1024)
+                {
+                    erros.Add($"Arquivo {formFile.FileName} excede o limite de 50MB.");
+                    continue;
+                }
+
+                // Converter para bytes
+                using var ms = new MemoryStream();
+                await formFile.CopyToAsync(ms);
+
+                arquivosValidos.Add(new ArquivoUpload
+                {
+                    Nome = formFile.FileName,
+                    ContentType = formFile.ContentType,
+                    Data = ms.ToArray(),
+                    Tamanho = formFile.Length
+                });
+            }
+
+            if (!arquivosValidos.Any())
+            {
+                return BadRequest(new
+                {
+                    message = "Nenhum arquivo válido encontrado.",
+                    erros
+                });
+            }
+
+            // Obter usuário atual
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                // Iniciar job em background
+                var jobId = await _backgroundJobService.StartImportJobAsync(userId, arquivosValidos);
+
+                return Ok(new
+                {
+                    message = "Importação iniciada em background.",
+                    jobId,
+                    totalArquivos = arquivosValidos.Count,
+                    arquivosProcessados = arquivosValidos.Select(a => a.Nome).ToList(),
+                    erros = erros.Any() ? erros : null
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao iniciar job de importação");
+                return StatusCode(500, new
+                {
+                    message = "Erro interno do servidor ao iniciar importação."
+                });
+            }
+        }
+
+        /// <summary>
+        /// Consultar status de um job
+        /// </summary>
+        [HttpGet("job-status/{jobId}")]
+        public async Task<IActionResult> GetJobStatus(string jobId)
+        {
+            var status = await _backgroundJobService.GetJobStatusAsync(jobId);
+            if (status == null)
+            {
+                return NotFound(new { message = "Job não encontrado." });
+            }
+
+            return Ok(status);
+        }
+
+        /// <summary>
+        /// Listar jobs do usuário atual
+        /// </summary>
+        [HttpGet("my-jobs")]
+        public async Task<IActionResult> GetMyJobs()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var jobs = await _backgroundJobService.GetUserJobsAsync(userId);
+            return Ok(jobs);
+        }
+
+        /// <summary>
+        /// Upload síncrono (método original para compatibilidade)
         /// </summary>
         [HttpPost("upload")]
         public async Task<IActionResult> UploadArquivos()
@@ -37,34 +162,34 @@ namespace Leads.API.API.Controllers
 
             var totalLeadsImportados = 0;
             var arquivosProcessados = new List<string>();
+            var erros = new List<string>();
 
             foreach (var formFile in arquivos)
             {
                 if (formFile.Length > 0)
                 {
-                    using var ms = new MemoryStream();
-                    await formFile.CopyToAsync(ms);
-                    var fileBytes = ms.ToArray();
-
-                    // Salva o arquivo no banco
-                    var novoArquivo = new Arquivo
-                    {
-                        Nome = Path.GetFileName(formFile.FileName),
-                        ContentType = formFile.ContentType,
-                        Data = fileBytes,
-                        DataUpload = DateTime.UtcNow
-                    };
-
-                    _context.Arquivos.Add(novoArquivo);
-                    await _context.SaveChangesAsync();
-
-                    // Processa os leads do arquivo
                     try
                     {
+                        using var ms = new MemoryStream();
+                        await formFile.CopyToAsync(ms);
+                        var fileBytes = ms.ToArray();
+
+                        // Salvar arquivo no banco
+                        var novoArquivo = new Arquivo
+                        {
+                            Nome = Path.GetFileName(formFile.FileName),
+                            ContentType = formFile.ContentType,
+                            Data = fileBytes,
+                            DataUpload = DateTime.UtcNow
+                        };
+
+                        _context.Arquivos.Add(novoArquivo);
+                        await _context.SaveChangesAsync();
+
+                        // Processar leads do arquivo
                         var leads = new List<Lead>();
                         var ext = Path.GetExtension(formFile.FileName).ToLower();
 
-                        // Reseta o stream para leitura
                         ms.Position = 0;
 
                         if (ext == ".csv")
@@ -77,24 +202,26 @@ namespace Leads.API.API.Controllers
                         }
                         else
                         {
-                            continue; // Pula arquivos não suportados
+                            erros.Add($"Formato não suportado: {formFile.FileName}");
+                            continue;
                         }
 
-                        // Importa os leads
-                        await _importacaoService.ImportarLeadsAsync(leads);
+                        // Importar leads usando o serviço existente
+                        var importacaoService = HttpContext.RequestServices.GetRequiredService<ImportacaoService>();
+                        await importacaoService.ImportarLeadsAsync(leads);
+
                         totalLeadsImportados += leads.Count;
                         arquivosProcessados.Add(formFile.FileName);
 
-                        // Atualiza o arquivo com informações de processamento
+                        // Atualizar arquivo com informações de processamento
                         novoArquivo.ProcessadoEm = DateTime.UtcNow;
                         novoArquivo.QuantidadeLeads = leads.Count;
                         await _context.SaveChangesAsync();
                     }
                     catch (Exception ex)
                     {
-                        // Log do erro (idealmente usar ILogger)
-                        novoArquivo.ErroProcessamento = ex.Message;
-                        await _context.SaveChangesAsync();
+                        _logger.LogError(ex, "Erro ao processar arquivo {FileName}", formFile.FileName);
+                        erros.Add($"Erro ao processar {formFile.FileName}: {ex.Message}");
                     }
                 }
             }
@@ -103,7 +230,8 @@ namespace Leads.API.API.Controllers
             {
                 message = $"{arquivos.Count} arquivo(s) enviado(s). {arquivosProcessados.Count} processado(s) com sucesso.",
                 totalLeadsImportados,
-                arquivosProcessados
+                arquivosProcessados,
+                erros = erros.Any() ? erros : null
             });
         }
 
@@ -111,10 +239,15 @@ namespace Leads.API.API.Controllers
         /// Lista arquivos com informações de processamento
         /// </summary>
         [HttpGet("listar")]
-        public async Task<IActionResult> ListarArquivos()
+        public async Task<IActionResult> ListarArquivos([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var lista = await _context.Arquivos
-                .AsNoTracking()
+            var query = _context.Arquivos.AsNoTracking();
+
+            var total = await query.CountAsync();
+            var arquivos = await query
+                .OrderByDescending(a => a.DataUpload)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(a => new
                 {
                     a.Id,
@@ -125,28 +258,35 @@ namespace Leads.API.API.Controllers
                     a.QuantidadeLeads,
                     a.ErroProcessamento,
                     Processado = a.ProcessadoEm != null,
-                    Sucesso = a.ErroProcessamento == null
+                    Sucesso = a.ErroProcessamento == null,
+                    TamanhoFormatado = FormatFileSize(a.Data.Length)
                 })
-                .OrderByDescending(a => a.DataUpload)
                 .ToListAsync();
 
-            return Ok(lista);
+            return Ok(new
+            {
+                arquivos,
+                total,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)total / pageSize)
+            });
         }
 
         /// <summary>
-        /// Permite fazer download de um arquivo específico pelo Id
+        /// Download de arquivo por ID
         /// </summary>
         [HttpGet("download/{id:int}")]
         public async Task<IActionResult> Download(int id)
         {
-            var a = await _context.Arquivos
+            var arquivo = await _context.Arquivos
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (a == null)
+            if (arquivo == null)
                 return NotFound(new { message = "Arquivo não encontrado." });
 
-            return File(a.Data, a.ContentType, a.Nome);
+            return File(arquivo.Data, arquivo.ContentType, arquivo.Nome);
         }
 
         /// <summary>
@@ -179,7 +319,8 @@ namespace Leads.API.API.Controllers
                     return BadRequest(new { message = "Formato de arquivo não suportado." });
                 }
 
-                await _importacaoService.ImportarLeadsAsync(leads);
+                var importacaoService = HttpContext.RequestServices.GetRequiredService<ImportacaoService>();
+                await importacaoService.ImportarLeadsAsync(leads);
 
                 arquivo.ProcessadoEm = DateTime.UtcNow;
                 arquivo.QuantidadeLeads = leads.Count;
@@ -194,10 +335,64 @@ namespace Leads.API.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao reprocessar arquivo {Id}", id);
+
                 arquivo.ErroProcessamento = ex.Message;
                 await _context.SaveChangesAsync();
+
                 return BadRequest(new { message = $"Erro ao reprocessar: {ex.Message}" });
             }
+        }
+
+        /// <summary>
+        /// Estatísticas de importação
+        /// </summary>
+        [HttpGet("estatisticas")]
+        public async Task<IActionResult> GetEstatisticas()
+        {
+            var hoje = DateTime.Today;
+            var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
+            var inicioSemana = hoje.AddDays(-(int)hoje.DayOfWeek);
+
+            var stats = new
+            {
+                TotalArquivos = await _context.Arquivos.CountAsync(),
+                ArquivosHoje = await _context.Arquivos.CountAsync(a => a.DataUpload.Date == hoje),
+                ArquivosSemana = await _context.Arquivos.CountAsync(a => a.DataUpload >= inicioSemana),
+                ArquivosMes = await _context.Arquivos.CountAsync(a => a.DataUpload >= inicioMes),
+
+                TotalLeads = await _context.Leads.CountAsync(),
+                LeadsHoje = await _context.Arquivos
+                    .Where(a => a.DataUpload.Date == hoje && a.QuantidadeLeads.HasValue)
+                    .SumAsync(a => a.QuantidadeLeads.Value),
+                LeadsSemana = await _context.Arquivos
+                    .Where(a => a.DataUpload >= inicioSemana && a.QuantidadeLeads.HasValue)
+                    .SumAsync(a => a.QuantidadeLeads.Value),
+                LeadsMes = await _context.Arquivos
+                    .Where(a => a.DataUpload >= inicioMes && a.QuantidadeLeads.HasValue)
+                    .SumAsync(a => a.QuantidadeLeads.Value),
+
+                ArquivosComErro = await _context.Arquivos.CountAsync(a => !string.IsNullOrEmpty(a.ErroProcessamento)),
+                UltimaImportacao = await _context.Arquivos
+                    .OrderByDescending(a => a.DataUpload)
+                    .Select(a => a.DataUpload)
+                    .FirstOrDefaultAsync()
+            };
+
+            return Ok(stats);
+        }
+
+        private static string FormatFileSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            double len = bytes;
+            int order = 0;
+            while (len >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                len = len / 1024;
+            }
+            return $"{len:0.##} {sizes[order]}";
         }
     }
 }

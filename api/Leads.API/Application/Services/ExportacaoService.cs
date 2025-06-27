@@ -1,10 +1,14 @@
 using ClosedXML.Excel;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Leads.API.Domain.DTOs;
 using Leads.API.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 public class ExportacaoService
 {
@@ -19,7 +23,12 @@ public class ExportacaoService
 
     private async Task<(int userId, int? clienteId)> ObterUsuarioAtual()
     {
-        var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
+        var user = _httpContextAccessor.HttpContext?.User
+           ?? throw new UnauthorizedAccessException("Usuário não autenticado");
+
+        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
         if (!int.TryParse(userIdClaim, out var userId))
             throw new UnauthorizedAccessException("Usuário não identificado");
 
@@ -33,7 +42,7 @@ public class ExportacaoService
     public async Task<(bool permitido, string mensagem, int limiteDisponivel)> VerificarLimiteExportacao(int? clienteId, int quantidadeSolicitada)
     {
         // Admin não tem limites
-        var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
+        var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (int.TryParse(userIdClaim, out var userId))
         {
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == userId);

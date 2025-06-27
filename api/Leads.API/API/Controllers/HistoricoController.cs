@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ClosedXML.Excel;
+using Leads.API.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Leads.API.Domain.Entities;
-using ClosedXML.Excel;
 using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Leads.API.API.Controllers
 {
@@ -33,7 +34,7 @@ namespace Leads.API.API.Controllers
             [FromQuery] int? clienteId = null)
         {
             // Pegar o usuário logado
-            var userIdClaim = User.FindFirst("sub")?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 
@@ -68,35 +69,38 @@ namespace Leads.API.API.Controllers
 
             var totalItens = await query.CountAsync();
 
+            var isAdmin = usuario.Perfil == "Admin";
+
             var items = await query
-                .OrderByDescending(h => h.DataExportacao)
-                .Skip((pagina - 1) * tamanhoPagina)
-                .Take(tamanhoPagina)
-                .Select(h => new
-                {
-                    h.Id,
-                    h.DataExportacao,
-                    h.QuantidadeLeads,
-                    h.FiltrosUtilizados,
-                    h.NomeArquivo,
-                    h.EmailDestino,
-                    h.EnviadoPorEmail,
-                    h.Status,
-                    h.MensagemErro,
-                    h.PlanoNome,
-                    h.LimiteDisponivel,
-                    Cliente = usuario.Perfil == "Admin" ? new
-                    {
-                        h.Cliente.RazaoSocial,
-                        h.Cliente.CNPJ
-                    } : null,
-                    Usuario = new
-                    {
-                        h.Usuario.NomeUsuario,
-                        h.Usuario.Email
-                    }
-                })
-                .ToListAsync();
+              .OrderByDescending(h => h.DataExportacao)
+              .Skip((pagina - 1) * tamanhoPagina)
+              .Take(tamanhoPagina)
+              .Select(h => new {
+                  h.Id,
+                  h.DataExportacao,
+                  h.QuantidadeLeads,
+                  FiltrosUtilizados = h.FiltrosUtilizados ?? "",
+                  NomeArquivo = h.NomeArquivo ?? "",
+                  EmailDestino = h.EmailDestino ?? "",
+                  h.EnviadoPorEmail,
+                  Status = h.Status ?? "",
+                  MensagemErro = h.MensagemErro ?? "",
+                  PlanoNome = h.PlanoNome ?? "",
+                  h.LimiteDisponivel,
+                  Cliente = isAdmin
+                  ? new
+                  {
+                      RazaoSocial = h.Cliente.RazaoSocial ?? "",
+                      CNPJ = h.Cliente.CNPJ ?? ""
+                  }
+                  : null,
+                  Usuario = new
+                  {
+                      NomeUsuario = h.Usuario.NomeUsuario ?? "",
+                      Email = h.Usuario.Email ?? ""
+                  }
+              })
+              .ToListAsync();
 
             return Ok(new
             {
@@ -110,7 +114,7 @@ namespace Leads.API.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> ObterDetalhes(int id)
         {
-            var userIdClaim = User.FindFirst("sub")?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 
@@ -169,7 +173,7 @@ namespace Leads.API.API.Controllers
             [FromQuery] DateTime dataInicio,
             [FromQuery] DateTime dataFim)
         {
-            var userIdClaim = User.FindFirst("sub")?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 

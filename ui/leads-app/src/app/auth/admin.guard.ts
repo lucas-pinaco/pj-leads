@@ -6,7 +6,7 @@ import {
   Router
 } from '@angular/router';
 import { Observable, map, catchError, of } from 'rxjs';
-import { AuthService } from './auth.service';
+import { AuthService } from '../services/auth.service';
 import { ClienteService } from '../services/cliente.service';
 
 @Injectable({

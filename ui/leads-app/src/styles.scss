@@ -1,5 +1,7 @@
-@use '@angular/material' as mat;
+// @use '@angular/material' as mat;
 
-@include mat.core();
+// @include mat.core();
 
-@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+// @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+@use 'styles/_pj-leads-globals.scss';

@@ -1,190 +1,106 @@
-<div class="container">
-    <!-- Card de Informações do Plano -->
-    <mat-card class="plano-info" appearance="outlined" *ngIf="meuPerfil && !carregandoPerfil">
+<div class="home-container">
+  <h1>Bem-vindo ao PJ Leads</h1>
+  <p class="subtitle">Sistema de Gestão de Leads Empresariais</p>
+
+  <div class="cards-grid">
+    <!-- Exportar Leads -->
+    <mat-card class="action-card">
       <mat-card-header>
-        <mat-card-title>
-          Seu Plano: {{ meuPerfil.plano.nome }}
-          <mat-chip-listbox *ngIf="isAdmin" class="admin-badge">
-            <mat-chip-option selected [disabled]="true" color="accent">
-              <mat-icon>verified_user</mat-icon>
-              Acesso Total
-            </mat-chip-option>
-          </mat-chip-listbox>
-        </mat-card-title>
+        <mat-icon mat-card-avatar>download</mat-icon>
+        <mat-card-title>Exportar Leads</mat-card-title>
+        <mat-card-subtitle>Faça download de leads qualificados</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Exporte leads empresariais com filtros avançados para sua campanha.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="primary" routerLink="/exportar">
+          <mat-icon>arrow_forward</mat-icon>
+          Acessar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Histórico -->
+    <mat-card class="action-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>history</mat-icon>
+        <mat-card-title>Histórico</mat-card-title>
+        <mat-card-subtitle>Visualize suas exportações anteriores</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Acompanhe todas as suas exportações e faça download novamente.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="accent" routerLink="/historico">
+          <mat-icon>arrow_forward</mat-icon>
+          Acessar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Administração (só para admin) -->
+    <mat-card class="action-card" *ngIf="isAdmin">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>admin_panel_settings</mat-icon>
+        <mat-card-title>Administração</mat-card-title>
+        <mat-card-subtitle>Gerencie clientes e planos</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Acesse as ferramentas administrativas do sistema.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="warn" routerLink="/admin/clientes">
+          <mat-icon>arrow_forward</mat-icon>
+          Acessar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Sessão de estatísticas / plano para usuários não-admin -->
+  <div class="stats-section" *ngIf="!isAdmin">
+    <mat-card *ngIf="carregando">
+      <mat-card-content>
+        <p>Carregando informações do seu plano…</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="!carregando && meuPerfil">
+      <mat-card-header>
+        <mat-card-title>Seu Plano: {{ meuPerfil.plano.nome }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <div class="plano-stats">
           <div class="stat">
             <mat-icon>download</mat-icon>
             <div class="stat-info">
-              <span class="stat-value">{{ isAdmin ? '∞' : meuPerfil.plano.exportacoesUtilizadas }}</span>
+              <span class="stat-value">
+                {{ meuPerfil.plano.exportacoesUtilizadas }}
+              </span>
               <span class="stat-label">Exportações realizadas</span>
             </div>
           </div>
           <div class="stat">
             <mat-icon>inventory_2</mat-icon>
             <div class="stat-info">
-              <span class="stat-value">{{ meuPerfil.plano.exportacoesDisponiveis }}</span>
+              <span class="stat-value">
+                {{ meuPerfil.plano.exportacoesDisponiveis }}
+              </span>
               <span class="stat-label">Exportações disponíveis</span>
             </div>
           </div>
           <div class="stat">
             <mat-icon>group</mat-icon>
             <div class="stat-info">
-              <span class="stat-value">{{ isAdmin ? '∞' : meuPerfil.plano.limiteLeadsPorExportacao }}</span>
+              <span class="stat-value">
+                {{ meuPerfil.plano.limiteLeadsPorExportacao }}
+              </span>
               <span class="stat-label">Leads por exportação</span>
             </div>
           </div>
         </div>
-        
-        <mat-chip-listbox *ngIf="limiteAtingido && !isAdmin" class="aviso-limite">
-          <mat-chip-option selected [disabled]="true" color="warn">
-            <mat-icon>warning</mat-icon>
-            Limite mensal atingido
-          </mat-chip-option>
-        </mat-chip-listbox>
       </mat-card-content>
     </mat-card>
-
-    <h2>Exportar Leads</h2>
-  
-    <form (ngSubmit)="exportar()" #f="ngForm" class="form-grid">
-  
-      <!-- Linha 1 -->
-      <div class="form-row">
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Razão Social ou Nome Fantasia</mat-label>
-          <input matInput [(ngModel)]="filtros.RazaoOuFantasia" name="razao" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>CNAE</mat-label>
-          <input matInput [(ngModel)]="filtros.CNAE" name="cnae" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Natureza Jurídica</mat-label>
-          <input matInput [(ngModel)]="filtros.NaturezaJuridica" name="natureza" />
-        </mat-form-field>
-      </div>
-  
-      <!-- Linha 2 -->
-      <div class="form-row">
-        <label class="block-label">Situação Cadastral:</label>
-        <mat-checkbox *ngFor="let s of situacoes"
-                      [checked]="filtros.SituacoesCadastrais.includes(s)"
-                      (change)="toggleSituacao(s)">
-          {{ s }}
-        </mat-checkbox>
-      </div>
-  
-      <!-- Linha 3 -->
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>UF</mat-label>
-          <input matInput maxlength="2" [(ngModel)]="filtros.Estado" name="estado" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill">
-          <mat-label>Município</mat-label>
-          <input matInput [(ngModel)]="filtros.Municipio" name="municipio" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill">
-          <mat-label>Bairro</mat-label>
-          <input matInput [(ngModel)]="filtros.Bairro" name="bairro" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill">
-          <mat-label>CEP</mat-label>
-          <input matInput maxlength="8" [(ngModel)]="filtros.CEP" name="cep" />
-        </mat-form-field>
-      </div>
-  
-      <!-- Linha 4 -->
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>DDD</mat-label>
-          <input matInput maxlength="2" [(ngModel)]="filtros.DDD" name="ddd" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill">
-          <mat-label>Data Abertura - A partir de</mat-label>
-          <input matInput [matDatepicker]="pickerDe" [(ngModel)]="filtros.DataAberturaDe" name="dataDe" />
-          <mat-datepicker-toggle matSuffix [for]="pickerDe"></mat-datepicker-toggle>
-          <mat-datepicker #pickerDe></mat-datepicker>
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill">
-          <mat-label>Data Abertura - Até</mat-label>
-          <input matInput [matDatepicker]="pickerAte" [(ngModel)]="filtros.DataAberturaAte" name="dataAte" />
-          <mat-datepicker-toggle matSuffix [for]="pickerAte"></mat-datepicker-toggle>
-          <mat-datepicker #pickerAte></mat-datepicker>
-        </mat-form-field>
-      </div>
-  
-      <!-- Linha 5 -->
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Capital Social (mín)</mat-label>
-          <input matInput type="number" [(ngModel)]="filtros.CapitalSocialMinimo" name="capitalMin" />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill">
-          <mat-label>Capital Social (máx)</mat-label>
-          <input matInput type="number" [(ngModel)]="filtros.CapitalSocialMaximo" name="capitalMax" />
-        </mat-form-field>
-      </div>
-  
-      <!-- Linha 6 -->
-      <div class="form-row checkboxes">
-        <mat-checkbox [(ngModel)]="filtros.SomenteMEI" name="somenteMei">Somente MEI</mat-checkbox>
-        <mat-checkbox [(ngModel)]="filtros.ExcluirMEI" name="excluirMei">Excluir MEI</mat-checkbox>
-        <mat-checkbox [(ngModel)]="filtros.SomenteMatriz" name="matriz">Somente Matriz</mat-checkbox>
-        <mat-checkbox [(ngModel)]="filtros.SomenteFilial" name="filial">Somente Filial</mat-checkbox>
-      </div>
-  
-      <!-- Linha 7 -->
-      <div class="form-row checkboxes">
-        <mat-checkbox [(ngModel)]="filtros.ComTelefone" name="comTelefone">Com telefone</mat-checkbox>
-        <mat-checkbox [(ngModel)]="filtros.SomenteFixo" name="fixo">Somente fixo</mat-checkbox>
-        <mat-checkbox [(ngModel)]="filtros.SomenteCelular" name="celular">Somente celular</mat-checkbox>
-        <mat-checkbox [(ngModel)]="filtros.ComEmail" name="comEmail">Com e-mail</mat-checkbox>
-      </div>
-  
-      <!-- Linha 8 -->
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Quantidade</mat-label>
-          <input matInput type="number" 
-                 [(ngModel)]="filtros.Quantidade" 
-                 name="quantidade"
-                 [max]="isAdmin ? 999999 : (meuPerfil?.plano?.limiteLeadsPorExportacao || 1000)" />
-          <mat-hint *ngIf="meuPerfil && !isAdmin">Máximo: {{ meuPerfil.plano.limiteLeadsPorExportacao }} leads</mat-hint>
-          <mat-hint *ngIf="isAdmin">Sem limite de quantidade</mat-hint>
-        </mat-form-field>
-  
-        <mat-checkbox [(ngModel)]="filtros.IncluirDuplicados" name="duplicados">Incluir Duplicados</mat-checkbox>
-      </div>
-      
-      <div class="form-row">
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>E-mail para envio</mat-label>
-          <input matInput [(ngModel)]="filtros.EmailDestino" name="emailDestino" />
-        </mat-form-field>
-        
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Nome do arquivo</mat-label>
-          <input matInput [(ngModel)]="filtros.NomeArquivo" name="nomeArquivo" />
-        </mat-form-field>
-      </div>
-      
-      <div class="form-row">
-        <button mat-raised-button color="primary" type="submit" [disabled]="!podeExportar">
-          <mat-icon *ngIf="limiteAtingido">block</mat-icon>
-          <span *ngIf="!limiteAtingido">Exportar Excel</span>
-          <span *ngIf="limiteAtingido">Limite Atingido</span>
-        </button>
-      </div>
-    </form>
   </div>
+</div>

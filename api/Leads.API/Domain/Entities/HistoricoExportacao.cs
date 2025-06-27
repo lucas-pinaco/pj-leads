@@ -24,7 +24,8 @@ namespace Leads.API.Domain.Entities
         [Required]
         public int QuantidadeLeads { get; set; }
 
-        [StringLength(500)]
+
+        [Column(TypeName = "nvarchar(max)")]
         public string FiltrosUtilizados { get; set; } // JSON com os filtros aplicados
 
         [StringLength(255)]
