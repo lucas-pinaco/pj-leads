@@ -1,0 +1,233 @@
+<div class="exportar-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Exportar Leads</mat-card-title>
+      <mat-card-subtitle>Configure os filtros para exportar leads personalizados</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Mensagens de feedback -->
+      <div *ngIf="mensagemSucesso" class="mensagem-sucesso">
+        <mat-icon>check_circle</mat-icon>
+        {{ mensagemSucesso }}
+      </div>
+
+      <div *ngIf="mensagemErro" class="mensagem-erro">
+        <mat-icon>error</mat-icon>
+        {{ mensagemErro }}
+      </div>
+
+      <!-- Barra de progresso -->
+      <mat-progress-bar mode="indeterminate" *ngIf="exportando"></mat-progress-bar>
+
+      <!-- Filtros Básicos -->
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>filter_list</mat-icon>
+            Filtros Básicos
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="filtros-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Quantidade de Leads</mat-label>
+            <input matInput type="number" [(ngModel)]="filtros.quantidade" min="1" max="10000">
+            <mat-hint>Máximo permitido pelo seu plano</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Razão Social ou Nome Fantasia</mat-label>
+            <input matInput [(ngModel)]="filtros.razaoOuFantasia">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CNAE (código ou descrição)</mat-label>
+            <input matInput [(ngModel)]="filtros.cnae">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Natureza Jurídica</mat-label>
+            <input matInput [(ngModel)]="filtros.naturezaJuridica">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Situações Cadastrais</mat-label>
+            <mat-select [(ngModel)]="filtros.situacoesCadastrais" multiple>
+              <mat-option *ngFor="let situacao of situacoesCadastraisOpcoes" [value]="situacao">
+                {{ situacao }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="checkbox-group">
+            <mat-checkbox [(ngModel)]="filtros.incluirDuplicados">
+              Incluir leads duplicados
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Filtros de Localização -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>location_on</mat-icon>
+            Localização
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="filtros-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="filtros.estado">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let uf of estados" [value]="uf">{{ uf }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Município</mat-label>
+            <input matInput [(ngModel)]="filtros.municipio">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Bairro</mat-label>
+            <input matInput [(ngModel)]="filtros.bairro">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CEP</mat-label>
+            <input matInput [(ngModel)]="filtros.cep" maxlength="8">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>DDD</mat-label>
+            <input matInput [(ngModel)]="filtros.ddd" maxlength="2">
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Filtros de Data e Capital -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>date_range</mat-icon>
+            Data de Abertura e Capital Social
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="filtros-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Data de Abertura - De</mat-label>
+            <input matInput [matDatepicker]="pickerDe" [(ngModel)]="filtros.dataAberturaDe">
+            <mat-datepicker-toggle matSuffix [for]="pickerDe"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDe></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Data de Abertura - Até</mat-label>
+            <input matInput [matDatepicker]="pickerAte" [(ngModel)]="filtros.dataAberturaAte">
+            <mat-datepicker-toggle matSuffix [for]="pickerAte"></mat-datepicker-toggle>
+            <mat-datepicker #pickerAte></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Capital Social Mínimo</mat-label>
+            <input matInput type="number" [(ngModel)]="filtros.capitalSocialMinimo">
+            <span matPrefix>R$&nbsp;</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Capital Social Máximo</mat-label>
+            <input matInput type="number" [(ngModel)]="filtros.capitalSocialMaximo">
+            <span matPrefix>R$&nbsp;</span>
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Filtros Avançados -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>tune</mat-icon>
+            Filtros Avançados
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="filtros-avancados">
+          <div class="secao-filtros">
+            <h4>Tipo de Empresa</h4>
+            <mat-checkbox [(ngModel)]="filtros.somenteMEI" (change)="onTipoEmpresaChange()">
+              Somente MEI
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="filtros.excluirMEI" (change)="onTipoEmpresaChange()">
+              Excluir MEI
+            </mat-checkbox>
+          </div>
+
+          <div class="secao-filtros">
+            <h4>Tipo de Estabelecimento</h4>
+            <mat-checkbox [(ngModel)]="filtros.somenteMatriz" (change)="onTipoEstabelecimentoChange()">
+              Somente Matriz
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="filtros.somenteFilial" (change)="onTipoEstabelecimentoChange()">
+              Somente Filial
+            </mat-checkbox>
+          </div>
+
+          <div class="secao-filtros">
+            <h4>Contatos</h4>
+            <mat-checkbox [(ngModel)]="filtros.comTelefone">
+              Com Telefone
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="filtros.somenteFixo" (change)="onTipoTelefoneChange()" [disabled]="!filtros.comTelefone">
+              Somente Fixo
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="filtros.somenteCelular" (change)="onTipoTelefoneChange()" [disabled]="!filtros.comTelefone">
+              Somente Celular
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="filtros.comEmail">
+              Com Email
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Opções de Exportação -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>save</mat-icon>
+            Opções de Exportação
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="opcoes-exportacao">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome do Arquivo</mat-label>
+            <input matInput [(ngModel)]="filtros.nomeArquivo">
+            <mat-hint>Nome do arquivo Excel que será gerado</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Enviar por Email (opcional)</mat-label>
+            <input matInput type="email" [(ngModel)]="filtros.emailDestino">
+            <mat-hint>Deixe em branco para apenas fazer download</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-button (click)="limparFiltros()">
+        <mat-icon>clear</mat-icon>
+        Limpar Filtros
+      </button>
+      <button mat-flat-button color="primary" (click)="exportar()" [disabled]="exportando">
+        <mat-icon>download</mat-icon>
+        Exportar Leads
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,121 @@
+<h2 mat-dialog-title>{{ data.cliente ? 'Editar Cliente' : 'Novo Cliente' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="cliente-form">
+    
+    <!-- Dados da Empresa -->
+    <div class="form-section">
+      <h3>Dados da Empresa</h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Razão Social *</mat-label>
+          <input matInput formControlName="razaoSocial" maxlength="200">
+          <mat-error>{{ getErrorMessage('razaoSocial') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome Fantasia</mat-label>
+          <input matInput formControlName="nomeFantasia" maxlength="200">
+          <mat-error>{{ getErrorMessage('nomeFantasia') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>CNPJ *</mat-label>
+          <input matInput formControlName="cnpj" 
+                 placeholder="00000000000000"
+                 (input)="formatarCNPJ($event)"
+                 maxlength="14">
+          <mat-error>{{ getErrorMessage('cnpj') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Plano *</mat-label>
+          <mat-select formControlName="planoId" [disabled]="carregandoPlanos">
+            <mat-option *ngFor="let plano of planos" [value]="plano.id">
+              {{ plano.nome }} - {{ plano.valor | currency:'BRL' }}
+            </mat-option>
+          </mat-select>
+          <mat-error>{{ getErrorMessage('planoId') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Contato -->
+    <div class="form-section">
+      <h3>Contato</h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>E-mail *</mat-label>
+          <input matInput formControlName="email" type="email" maxlength="200">
+          <mat-error>{{ getErrorMessage('email') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Telefone</mat-label>
+          <input matInput formControlName="telefone" 
+                 placeholder="(11) 99999-9999"
+                 maxlength="20">
+          <mat-error>{{ getErrorMessage('telefone') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Endereço -->
+    <div class="form-section">
+      <h3>Endereço</h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Endereço</mat-label>
+          <input matInput formControlName="endereco" maxlength="200">
+          <mat-error>{{ getErrorMessage('endereco') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-2">
+          <mat-label>Cidade</mat-label>
+          <input matInput formControlName="cidade" maxlength="100">
+          <mat-error>{{ getErrorMessage('cidade') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Estado</mat-label>
+          <input matInput formControlName="estado" 
+                 placeholder="SP"
+                 (input)="formatarEstado($event)"
+                 maxlength="2">
+          <mat-error>{{ getErrorMessage('estado') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>CEP</mat-label>
+          <input matInput formControlName="cep" 
+                 placeholder="00000000"
+                 (input)="formatarCEP($event)"
+                 maxlength="8">
+          <mat-error>{{ getErrorMessage('cep') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancelar()" [disabled]="salvando">
+    Cancelar
+  </button>
+  <button mat-flat-button color="primary" 
+          (click)="salvar()" 
+          [disabled]="salvando || form.invalid">
+    <mat-spinner diameter="20" *ngIf="salvando"></mat-spinner>
+    <span *ngIf="!salvando">{{ data.cliente ? 'Salvar' : 'Criar' }}</span>
+  </button>
+</mat-dialog-actions>

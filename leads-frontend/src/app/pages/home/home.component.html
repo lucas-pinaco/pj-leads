@@ -1,0 +1,106 @@
+<div class="home-container">
+  <h1>Bem-vindo ao PJ Leads</h1>
+  <p class="subtitle">Sistema de Gestão de Leads Empresariais</p>
+
+  <div class="cards-grid">
+    <!-- Exportar Leads -->
+    <mat-card class="action-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>download</mat-icon>
+        <mat-card-title>Exportar Leads</mat-card-title>
+        <mat-card-subtitle>Faça download de leads qualificados</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Exporte leads empresariais com filtros avançados para sua campanha.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="primary" routerLink="/exportar">
+          <mat-icon>arrow_forward</mat-icon>
+          Acessar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Histórico -->
+    <mat-card class="action-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>history</mat-icon>
+        <mat-card-title>Histórico</mat-card-title>
+        <mat-card-subtitle>Visualize suas exportações anteriores</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Acompanhe todas as suas exportações e faça download novamente.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="accent" routerLink="/historico">
+          <mat-icon>arrow_forward</mat-icon>
+          Acessar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Administração (só para admin) -->
+    <mat-card class="action-card" *ngIf="isAdmin">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>admin_panel_settings</mat-icon>
+        <mat-card-title>Administração</mat-card-title>
+        <mat-card-subtitle>Gerencie clientes e planos</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Acesse as ferramentas administrativas do sistema.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button color="warn" routerLink="/admin/clientes">
+          <mat-icon>arrow_forward</mat-icon>
+          Acessar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Sessão de estatísticas / plano para usuários não-admin -->
+  <div class="stats-section" *ngIf="!isAdmin">
+    <mat-card *ngIf="carregando">
+      <mat-card-content>
+        <p>Carregando informações do seu plano…</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="!carregando && meuPerfil">
+      <mat-card-header>
+        <mat-card-title>Seu Plano: {{ meuPerfil.plano.nome }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="plano-stats">
+          <div class="stat">
+            <mat-icon>download</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">
+                {{ meuPerfil.plano.exportacoesUtilizadas }}
+              </span>
+              <span class="stat-label">Exportações realizadas</span>
+            </div>
+          </div>
+          <div class="stat">
+            <mat-icon>inventory_2</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">
+                {{ meuPerfil.plano.exportacoesDisponiveis }}
+              </span>
+              <span class="stat-label">Exportações disponíveis</span>
+            </div>
+          </div>
+          <div class="stat">
+            <mat-icon>group</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">
+                {{ meuPerfil.plano.limiteLeadsPorExportacao }}
+              </span>
+              <span class="stat-label">Leads por exportação</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

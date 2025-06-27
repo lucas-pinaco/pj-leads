@@ -1,0 +1,82 @@
+.home-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.home-container .subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 32px;
+  font-size: 18px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.action-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.action-card mat-card-header {
+  margin-bottom: 16px;
+}
+
+.action-card mat-icon[mat-card-avatar] {
+  width: 40px;
+  height: 40px;
+  font-size: 40px;
+  color: #5e35b1;
+}
+
+.action-card mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+.stats-section {
+  margin-top: 48px;
+}
+
+.stats-section mat-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.plano-stats {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.plano-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plano-stats .stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.2em;
+  font-weight: bold;
+}
